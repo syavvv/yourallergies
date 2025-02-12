@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Deteksi Alergen - YourAllergy</title>
+
+    <!-- Fonts and CSS -->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kracker&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .detect-page {
+            padding: 50px 0;
+            background-color: #f8f9fa;
+        }
+
+        .result {
+            margin-top: 30px;
+        }
+
+        .camera-controls {
+            margin-top: 20px;
+        }
+
+        td {
+            word-wrap: break-word;
+            max-width: 200px;
+        }
+
+        th {
+            word-wrap: break-word;
+        }
+
+        .table-responsive {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        .btn-lumut {
+            background-color: #3b5d2e;
+            color: white;
+        }
+
+        .btn-lumut:hover {
+            background-color: #2a4a1a;
+            color: white;
+        }
+
+        .d-none {
+            display: none;
+        }
+
+        .card {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        video {
+            max-width: 100%;
+            height: auto;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body class="detect-page">
+
+    <!-- Header -->
+    <header id="header" class="header d-flex align-items-center sticky-top">
+        <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
+            <a href="{{ url_for('home') }}" class="logo d-flex align-items-center">
+                <h1 class="sitename"><span>Your</span>Allergy</h1>
+            </a>
+
+            <a href="{{ url_for('home') }}" class="btn btn-link d-flex align-items-center">
+                <i class="bi bi-house-door-fill" style="color: green;"></i>
+            </a>
+            
+        </div>
+    </header>
+
+<!-- Main Content -->
+<main class="main container">
+    <h1 class="text-center mb-4" style="font-family: 'Kracker', cursive; margin-top: 50px;">🥨Periksa Makananmu Disini🥨</h1>
+</main>
+
+
+        <!-- Upload Form -->
+<section class="card p-4 mb-4">
+    <h3 class="text-center" style="font-family: 'Comfortaa', cursive;">Unggah Gambar</h3>
+    <form action="/detect" method="POST" enctype="multipart/form-data" class="text-center">
+        <input type="file" name="file" accept="image/*" class="form-control mb-3" required>
+        <button class="btn btn-lumut" type="submit" style="font-family: 'Comfortaa', cursive;">Analisis Gambar</button>
+    </form>
+</section>
+
+        <!-- Camera Section -->
+<style>
+    .card h3 {
+        font-size: 1.5rem; /* Ukuran teks diperkecil */
+        color: Black; /* Warna teks diubah menjadi hijau */
+        text-align: center;
+    }
+    .card h4 {
+        font-size: 0.9rem; /* Ukuran teks diperkecil */
+        color: green; /* Warna teks diubah menjadi hijau */
+        text-align: center;
+    }
+
+    /* Styling untuk hasil gambar */
+    .camera-controls {
+        text-align: center;
+    }
+
+    /* Styling untuk tombol kamera */
+    .camera-controls button {
+        font-family: 'Comfortaa', cursive;
+    }
+
+    /* Mengurangi jarak antara gambar yang diambil dengan tombol dan teks lainnya */
+    .camera-controls img {
+        margin-top: 10px;
+    }
+</style>
+        
+        <section class="card p-4 mb-4">
+            <h3 style="font-family: 'Comfortaa', cursive;">Ambil Gambar Menggunakan Kamera</h3>
+            <h4 style="font-family: 'Comfortaa', cursive;">Pastikan Gambar yang di ambil tidak buram!</h4>
+            <div class="camera-controls text-center">
+                <button id="activateCamera" class="btn btn-lumut mb-3" style="font-family: 'Comfortaa', cursive;">Aktifkan Kamera</button>
+                <video id="video" autoplay class="d-block mx-auto mb-3"></video>
+                <canvas id="canvas" class="d-none"></canvas>
+                <img id="capturedImage" alt="Gambar yang diambil" class="d-none">
+                <button id="captureButton" class="btn btn-lumut d-none" style="font-family: 'Comfortaa', cursive;">Ambil Gambar</button>
+                <form action="/detect" method="POST" class="mt-3 d-none" id="cameraForm">
+                    <input type="hidden" name="camera_image" id="cameraImage">
+                    <button class="btn btn-lumut" type="submit" style="font-family: 'Comfortaa', cursive;">Analisis Gambar</button>
+                    <button id="takeAnotherPicture" class="btn btn-warning d-none" style="font-family: 'Comfortaa', cursive;">Ambil Gambar Lain</button>
+                </form>
+            </div>
+        </section>
+
+        {% if result and (result[0] or result[1]) %}
+<section class="result">
+    <h2 class="text-center">Hasil Deteksi Alergen:</h2>
+    <ul class="allergen-list">
+        {% for allergen, alternative, solution in result[0] %}
+        <li>
+            <strong>{{ allergen }}</strong>
+            <ul>
+                <li><strong>Alternatif:</strong> {{ alternative }}</li>
+                <li><strong>Solusi:</strong> {{ solution }}</li>
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+
+{% if result[1] %}
+<section class="e-code text-center mt-4">
+    <h3>E Kode yang terdeteksi:</h3>
+    <ul class="e-code-list">
+        {% for code, description in result[1] %}
+        <li>
+            <strong>{{ code }}</strong> - {{ description }}
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
+{% else %}
+<section class="result text-center">
+    <h2>Hasil Deteksi:</h2>
+    <p class="text-muted">Makanan ini bebas alergen dan kode E tidak ditemukan.</p>
+</section>
+{% endif %}
+
+<style>
+    /* Styling untuk List */
+    .allergen-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0 auto;
+        max-width: 600px;
+        font-family: 'Comfortaa', sans-serif;
+    }
+
+    .allergen-list > li {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+
+    .allergen-list > li strong {
+        color: #556b2f;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .allergen-list ul {
+        margin-top: 10px;
+        padding-left: 20px;
+    }
+
+    /* Styling untuk e-code list */
+    .e-code-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0 auto;
+        max-width: 600px;
+        font-family: 'Comfortaa', cursive, sans-serif;
+    }
+
+    .e-code-list > li {
+        background-color: #f0e68c;
+        margin-bottom: 15px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+    }
+
+    .e-code-list > li strong {
+        color: #8b4513;
+    }
+
+    /* Styling untuk e-code heading */
+    .e-code h3 {
+        font-family: 'Comfortaa', cursive, sans-serif;
+        color: #556b2f;
+    }
+
+    /* Styling untuk bagian result */
+    .result h2 {
+        font-family: 'Poppins', sans-serif;
+        color: #556b2f;
+    }
+
+    .e-code p {
+        font-family: 'Roboto', sans-serif;
+        color: #333;
+    }
+</style>
+  
+
+    </main>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const capturedImage = document.getElementById('capturedImage');
+        const captureButton = document.getElementById('captureButton');
+        const cameraForm = document.getElementById('cameraForm');
+        const cameraImageInput = document.getElementById('cameraImage');
+        const activateCameraButton = document.getElementById('activateCamera');
+        const takeAnotherPictureButton = document.getElementById('takeAnotherPicture');
+
+        let stream;
+
+        activateCameraButton.addEventListener('click', () => {
+            if (stream) {
+                stopCamera();
+            } else {
+                startCamera();
+            }
+        });
+
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then((userStream) => {
+                    stream = userStream;
+                    video.srcObject = stream;
+                    captureButton.classList.remove('d-none');
+                    activateCameraButton.classList.add('d-none');
+                })
+                .catch((err) => {
+                    console.error('Error accessing camera: ', err);
+                });
+        }
+
+        function stopCamera() {
+            if (stream) {
+                let tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+                video.srcObject = null;
+                captureButton.classList.add('d-none');
+            }
+        }
+
+        captureButton.addEventListener('click', () => {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imageData = canvas.toDataURL('image/png');
+            cameraImageInput.value = imageData;
+
+            capturedImage.src = imageData;
+            capturedImage.classList.remove('d-none');
+            cameraForm.classList.remove('d-none');
+
+            activateCameraButton.classList.add('d-none');
+            takeAnotherPictureButton.classList.remove('d-none');
+
+            stopCamera();
+        });
+
+        takeAnotherPictureButton.addEventListener('click', () => {
+            capturedImage.classList.add('d-none');
+            cameraForm.classList.add('d-none');
+            takeAnotherPictureButton.classList.add('d-none');
+
+            startCamera();
+        });
+    </script>
+
+</body>
+</html>
