@@ -151,4 +151,7 @@ def detect():
     return render_template('detect.html', result=result)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    import os
+    port = int(os.environ.get("PORT", 5000))  # Ambil port dari environment variable, default 5000 jika tidak ada
+    app.run(host="0.0.0.0", port=port, debug=False)  # debug=False saat deploy ke production
+
