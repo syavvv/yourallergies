@@ -9,6 +9,15 @@ from io import BytesIO
 # Inisialisasi aplikasi Flask
 app = Flask(__name__)
 
+import os
+
+tesseract_path = os.environ.get("TESSERACT_PATH")
+port = int(os.environ.get("PORT", 10000))  # Default 5000 jika tidak ada
+secret_key = os.environ.get("SECRET_KEY")
+
+pytesseract.pytesseract.tesseract_cmd = tesseract_path
+app.secret_key = secret_key
+
 # Konfigurasi direktori unggahan
 UPLOAD_FOLDER = 'static/uploads'
 if not os.path.exists(UPLOAD_FOLDER):
@@ -151,7 +160,5 @@ def detect():
     return render_template('detect.html', result=result)
 
 if __name__ == '__main__':
-    import os
-    port = int(os.environ.get("PORT", 5000))  # Ambil port dari environment variable, default 5000 jika tidak ada
-    app.run(host="0.0.0.0", port=port, debug=False)  # debug=False saat deploy ke production
+    app.run(host="0.0.0.0", port=8080, debug=True)
 
