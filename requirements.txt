@@ -6,3 +6,4 @@ scikit-learn
 pytesseract
 Pillow
 opencv-python
+xgboost
