@@ -1,8 +1,8 @@
-Flask
-pytesseract
-Pillow
+Flask==2.3.3
+gunicorn
 joblib
 numpy
 scikit-learn
-gunicorn
+pytesseract
+Pillow
 opencv-python
