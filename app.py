@@ -131,15 +131,6 @@ def detect():
                 allergens, e_codes = classify_allergens(extracted_text)
                 result = (allergens, e_codes)
 
-        elif 'camera_image' in request.form:
-            camera_data = request.form['camera_image']
-            if ',' in camera_data:
-                camera_data = camera_data.split(',')[1]
-            image = BytesIO(base64.b64decode(camera_data))
-            extracted_text = process_image(image)
-            allergens, e_codes = classify_allergens(extracted_text)
-            result = (allergens, e_codes)
-
     return render_template('detect.html', result=result)
 
 # Menjalankan Flask (khusus lokal)
