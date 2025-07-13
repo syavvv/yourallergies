@@ -6,8 +6,8 @@ import joblib
 import base64
 from io import BytesIO  
 
-# Inisialisasi Flask
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024  # Maks upload 25MB
 
 # Load variabel lingkungan
 port = int(os.environ.get("PORT", 5000))  
