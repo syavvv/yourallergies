@@ -267,13 +267,15 @@
 
     </main>
 
-    <script>
+   
+<script>
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const capturedImage = document.getElementById('capturedImage');
     const activateCameraButton = document.getElementById('activateCamera');
     const captureButton = document.getElementById('captureButton');
     const takeAnotherPictureButton = document.getElementById('takeAnotherPicture');
+    const cameraForm = document.getElementById('cameraForm');
 
     let stream;
 
@@ -313,49 +315,52 @@
         takeAnotherPictureButton.classList.add('d-none');
         capturedImage.classList.add('d-none');
         activateCameraButton.classList.remove('d-none');
+        cameraForm.classList.add('d-none'); // Sembunyikan kembali form deteksi
     }
 
     captureButton.addEventListener('click', () => {
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    canvas.toBlob(blob => {
-        const imageURL = URL.createObjectURL(blob);
-        capturedImage.src = imageURL;
-        capturedImage.classList.remove('d-none');
-        takeAnotherPictureButton.classList.remove('d-none');
+        canvas.toBlob(blob => {
+            const imageURL = URL.createObjectURL(blob);
+            capturedImage.src = imageURL;
+            capturedImage.classList.remove('d-none');
 
-        const formData = new FormData();
-        formData.append('file', blob, 'captured.png');
+            const formData = new FormData();
+            formData.append('file', blob, 'captured.png');
 
-        fetch('/detect', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.text())
-        .then(html => {
-            // Ambil hasil dari HTML response dan tampilkan hanya bagian hasilnya
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const resultSection = doc.querySelector('.result');
-            const ecodeSection = doc.querySelector('.e-code');
+            fetch('/detect', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const resultSection = doc.querySelector('.result');
+                const ecodeSection = doc.querySelector('.e-code');
 
-            const resultContainer = document.getElementById('resultContainer');
-            resultContainer.innerHTML = '';
-            if (resultSection) resultContainer.appendChild(resultSection);
-            if (ecodeSection) resultContainer.appendChild(ecodeSection);
-        })
-        .catch(err => {
-            alert('Gagal mengirim gambar ke server.');
-            console.error(err);
-        });
+                const resultContainer = document.getElementById('resultContainer');
+                resultContainer.innerHTML = '';
+                if (resultSection) resultContainer.appendChild(resultSection);
+                if (ecodeSection) resultContainer.appendChild(ecodeSection);
 
-        stopCamera();
-        captureButton.classList.add('d-none');
-    }, 'image/png');
-});
+                // ✅ Tampilkan form & tombol "Ambil Gambar Lain"
+                cameraForm.classList.remove('d-none');
+                takeAnotherPictureButton.classList.remove('d-none');
+            })
+            .catch(err => {
+                alert('Gagal mengirim gambar ke server.');
+                console.error(err);
+            });
+
+            stopCamera(); // stop kamera
+            captureButton.classList.add('d-none'); // sembunyikan tombol ambil gambar
+        }, 'image/png');
+    });
 
     takeAnotherPictureButton.addEventListener('click', () => {
         resetCameraUI();
