@@ -103,7 +103,8 @@
     <h1 class="text-center mb-4" style="font-family: 'Kracker', cursive; margin-top: 50px;">🥨Periksa Makananmu Disini🥨</h1>
 </main>
 
-<!-- Upload Form -->
+
+        <!-- Upload Form -->
 <section class="card p-4 mb-4">
     <h3 class="text-center" style="font-family: 'Comfortaa', cursive;">Unggah Gambar</h3>
     <form action="/detect" method="POST" enctype="multipart/form-data" class="text-center">
@@ -112,25 +113,53 @@
     </form>
 </section>
 
-<!-- Camera Section with Blob Upload -->
-<section class="card p-4 mb-4">
-    <h3 style="font-family: 'Comfortaa', cursive;">Ambil Gambar Menggunakan Kamera</h3>
-    <h4 style="font-family: 'Comfortaa', cursive;">Pastikan Gambar yang di ambil tidak buram!</h4>
-    <div class="camera-controls text-center">
-        <button id="activateCamera" class="btn btn-lumut mb-3" style="font-family: 'Comfortaa', cursive;">Aktifkan Kamera</button>
-        <video id="video" autoplay class="d-block mx-auto mb-3"></video>
-        <canvas id="canvas" class="d-none"></canvas>
-        <img id="capturedImage" alt="Gambar yang diambil" class="d-none">
-        <button id="captureButton" class="btn btn-lumut d-none" style="font-family: 'Comfortaa', cursive;">Ambil Gambar</button>
-        <form id="cameraForm" class="mt-3 d-none" enctype="multipart/form-data">
-            <input type="file" id="blobImage" name="file" hidden>
-            <button class="btn btn-lumut" type="submit" style="font-family: 'Comfortaa', cursive;">Analisis Gambar</button>
-            <button id="takeAnotherPicture" class="btn btn-warning d-none" type="button" style="font-family: 'Comfortaa', cursive;">Ambil Gambar Lain</button>
-        </form>
-    </div>
-</section>
+        <!-- Camera Section -->
+<style>
+    .card h3 {
+        font-size: 1.5rem; /* Ukuran teks diperkecil */
+        color: Black; /* Warna teks diubah menjadi hijau */
+        text-align: center;
+    }
+    .card h4 {
+        font-size: 0.9rem; /* Ukuran teks diperkecil */
+        color: green; /* Warna teks diubah menjadi hijau */
+        text-align: center;
+    }
 
-{% if result and (result[0] or result[1]) %}
+    /* Styling untuk hasil gambar */
+    .camera-controls {
+        text-align: center;
+    }
+
+    /* Styling untuk tombol kamera */
+    .camera-controls button {
+        font-family: 'Comfortaa', cursive;
+    }
+
+    /* Mengurangi jarak antara gambar yang diambil dengan tombol dan teks lainnya */
+    .camera-controls img {
+        margin-top: 10px;
+    }
+</style>
+        
+        <section class="card p-4 mb-4">
+            <h3 style="font-family: 'Comfortaa', cursive;">Ambil Gambar Menggunakan Kamera</h3>
+            <h4 style="font-family: 'Comfortaa', cursive;">Pastikan Gambar yang di ambil tidak buram!</h4>
+            <div class="camera-controls text-center">
+                <button id="activateCamera" class="btn btn-lumut mb-3" style="font-family: 'Comfortaa', cursive;">Aktifkan Kamera</button>
+                <video id="video" autoplay class="d-block mx-auto mb-3"></video>
+                <canvas id="canvas" class="d-none"></canvas>
+                <img id="capturedImage" alt="Gambar yang diambil" class="d-none">
+                <button id="captureButton" class="btn btn-lumut d-none" style="font-family: 'Comfortaa', cursive;">Ambil Gambar</button>
+                <form action="/detect" method="POST" class="mt-3 d-none" id="cameraForm">
+                    <input type="hidden" name="camera_image" id="cameraImage">
+                    <button class="btn btn-lumut" type="submit" style="font-family: 'Comfortaa', cursive;">Analisis Gambar</button>
+                    <button id="takeAnotherPicture" class="btn btn-warning d-none" style="font-family: 'Comfortaa', cursive;">Ambil Gambar Lain</button>
+                </form>
+            </div>
+        </section>
+
+        {% if result and (result[0] or result[1]) %}
 <section class="result">
     <h2 class="text-center">Hasil Deteksi Alergen:</h2>
     <ul class="allergen-list">
@@ -145,6 +174,7 @@
         {% endfor %}
     </ul>
 </section>
+
 {% if result[1] %}
 <section class="e-code text-center mt-4">
     <h3>E Kode yang terdeteksi:</h3>
@@ -164,18 +194,96 @@
 </section>
 {% endif %}
 
-<script>
+<style>
+    /* Styling untuk List */
+    .allergen-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0 auto;
+        max-width: 600px;
+        font-family: 'Comfortaa', sans-serif;
+    }
+
+    .allergen-list > li {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+
+    .allergen-list > li strong {
+        color: #556b2f;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .allergen-list ul {
+        margin-top: 10px;
+        padding-left: 20px;
+    }
+
+    /* Styling untuk e-code list */
+    .e-code-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0 auto;
+        max-width: 600px;
+        font-family: 'Comfortaa', cursive, sans-serif;
+    }
+
+    .e-code-list > li {
+        background-color: #f0e68c;
+        margin-bottom: 15px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+    }
+
+    .e-code-list > li strong {
+        color: #8b4513;
+    }
+
+    /* Styling untuk e-code heading */
+    .e-code h3 {
+        font-family: 'Comfortaa', cursive, sans-serif;
+        color: #556b2f;
+    }
+
+    /* Styling untuk bagian result */
+    .result h2 {
+        font-family: 'Poppins', sans-serif;
+        color: #556b2f;
+    }
+
+    .e-code p {
+        font-family: 'Roboto', sans-serif;
+        color: #333;
+    }
+</style>
+
+    </main>
+
+    <script>
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const capturedImage = document.getElementById('capturedImage');
     const activateCameraButton = document.getElementById('activateCamera');
-    const cameraForm = document.getElementById('cameraForm');
     const captureButton = document.getElementById('captureButton');
     const takeAnotherPictureButton = document.getElementById('takeAnotherPicture');
 
     let stream;
 
     activateCameraButton.addEventListener('click', () => {
+        if (stream) {
+            stopCamera();
+            resetCameraUI();
+        } else {
+            startCamera();
+        }
+    });
+
+    function startCamera() {
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
             .then((userStream) => {
                 stream = userStream;
@@ -187,7 +295,22 @@
             .catch((err) => {
                 console.error("Kamera tidak tersedia:", err);
             });
-    });
+    }
+
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            video.srcObject = null;
+            stream = null;
+        }
+    }
+
+    function resetCameraUI() {
+        captureButton.classList.add('d-none');
+        takeAnotherPictureButton.classList.add('d-none');
+        capturedImage.classList.add('d-none');
+        activateCameraButton.classList.remove('d-none');
+    }
 
     captureButton.addEventListener('click', () => {
         canvas.width = video.videoWidth;
@@ -195,56 +318,42 @@
         const context = canvas.getContext('2d');
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        const imageData = canvas.toDataURL('image/png');
-        capturedImage.src = imageData;
-        capturedImage.classList.remove('d-none');
-        cameraForm.classList.remove('d-none');
-        takeAnotherPictureButton.classList.remove('d-none');
+        canvas.toBlob(blob => {
+            // Tampilkan gambar yang ditangkap
+            const imageURL = URL.createObjectURL(blob);
+            capturedImage.src = imageURL;
+            capturedImage.classList.remove('d-none');
+            takeAnotherPictureButton.classList.remove('d-none');
 
-        // stop camera after capture
-        let tracks = stream.getTracks();
-        tracks.forEach(track => track.stop());
-        video.srcObject = null;
-        captureButton.classList.add('d-none');
-
-        // convert dataURL to blob and send to backend
-        canvas.toBlob(async function (blob) {
+            // Kirim gambar sebagai file (bukan base64)
             const formData = new FormData();
-            formData.append("file", blob, "camera-capture.png");
+            formData.append('file', blob, 'captured.png');
 
-            try {
-                const response = await fetch("/detect", {
-                    method: "POST",
-                    body: formData
-                });
-                const resultPage = await response.text();
+            fetch('/detect', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(html => {
                 document.open();
-                document.write(resultPage);
+                document.write(html);
                 document.close();
-            } catch (err) {
-                alert("Gagal mengirim gambar: " + err.message);
-            }
+            })
+            .catch(err => {
+                alert('Gagal mengirim gambar ke server.');
+                console.error(err);
+            });
+
+            stopCamera();
+            captureButton.classList.add('d-none');
         }, 'image/png');
     });
 
     takeAnotherPictureButton.addEventListener('click', () => {
-        capturedImage.classList.add('d-none');
-        cameraForm.classList.add('d-none');
-        takeAnotherPictureButton.classList.add('d-none');
-        activateCameraButton.classList.remove('d-none');
+        resetCameraUI();
         startCamera();
     });
+</script>S
 
-    function startCamera() {
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-            .then((userStream) => {
-                stream = userStream;
-                video.srcObject = stream;
-                video.play();
-                captureButton.classList.remove('d-none');
-            })
-            .catch((err) => {
-                console.error("Kamera tidak tersedia:", err);
-            });
-    }
-</script>
+</body>
+</html>

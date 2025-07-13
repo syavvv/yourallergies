@@ -124,12 +124,18 @@ def detect():
     if request.method == 'POST':
         if 'file' in request.files:
             uploaded_file = request.files['file']
+            print("File diterima dari kamera:", uploaded_file.filename)
+
             if uploaded_file.filename != '':
                 image_path = os.path.join(UPLOAD_FOLDER, uploaded_file.filename)
                 uploaded_file.save(image_path)
+                print("Disimpan di:", image_path)
+
                 extracted_text = process_image(image_path)
                 allergens, e_codes = classify_allergens(extracted_text)
                 result = (allergens, e_codes)
+        else:
+            print("Tidak ada file dalam request")
 
     return render_template('detect.html', result=result)
 
