@@ -159,6 +159,8 @@
             </div>
         </section>
 
+<div id="resultContainer" class="mt-4"></div>
+
         {% if result and (result[0] or result[1]) %}
 <section class="result">
     <h2 class="text-center">Hasil Deteksi Alergen:</h2>
@@ -174,6 +176,7 @@
         {% endfor %}
     </ul>
 </section>
+
 
 {% if result[1] %}
 <section class="e-code text-center mt-4">
@@ -313,47 +316,52 @@
     }
 
     captureButton.addEventListener('click', () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const context = canvas.getContext('2d');
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        canvas.toBlob(blob => {
-            // Tampilkan gambar yang ditangkap
-            const imageURL = URL.createObjectURL(blob);
-            capturedImage.src = imageURL;
-            capturedImage.classList.remove('d-none');
-            takeAnotherPictureButton.classList.remove('d-none');
+    canvas.toBlob(blob => {
+        const imageURL = URL.createObjectURL(blob);
+        capturedImage.src = imageURL;
+        capturedImage.classList.remove('d-none');
+        takeAnotherPictureButton.classList.remove('d-none');
 
-            // Kirim gambar sebagai file (bukan base64)
-            const formData = new FormData();
-            formData.append('file', blob, 'captured.png');
+        const formData = new FormData();
+        formData.append('file', blob, 'captured.png');
 
-            fetch('/detect', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.text())
-            .then(html => {
-                document.open();
-                document.write(html);
-                document.close();
-            })
-            .catch(err => {
-                alert('Gagal mengirim gambar ke server.');
-                console.error(err);
-            });
+        fetch('/detect', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Ambil hasil dari HTML response dan tampilkan hanya bagian hasilnya
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const resultSection = doc.querySelector('.result');
+            const ecodeSection = doc.querySelector('.e-code');
 
-            stopCamera();
-            captureButton.classList.add('d-none');
-        }, 'image/png');
-    });
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = '';
+            if (resultSection) resultContainer.appendChild(resultSection);
+            if (ecodeSection) resultContainer.appendChild(ecodeSection);
+        })
+        .catch(err => {
+            alert('Gagal mengirim gambar ke server.');
+            console.error(err);
+        });
+
+        stopCamera();
+        captureButton.classList.add('d-none');
+    }, 'image/png');
+});
 
     takeAnotherPictureButton.addEventListener('click', () => {
         resetCameraUI();
         startCamera();
     });
-</script>S
+</script>
 
 </body>
 </html>
