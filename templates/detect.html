@@ -117,14 +117,15 @@
     <h3 style="font-family: 'Comfortaa', cursive;">Ambil Gambar Menggunakan Kamera</h3>
     <h4 style="font-family: 'Comfortaa', cursive;">Pastikan Gambar yang di ambil tidak buram!</h4>
     <div class="camera-controls text-center">
-        <button id="activateCamera" class="btn btn-lumut mb-3">Aktifkan Kamera</button>
+        <button id="activateCamera" class="btn btn-lumut mb-3" style="font-family: 'Comfortaa', cursive;">Aktifkan Kamera</button>
         <video id="video" autoplay class="d-block mx-auto mb-3"></video>
         <canvas id="canvas" class="d-none"></canvas>
         <img id="capturedImage" alt="Gambar yang diambil" class="d-none">
+        <button id="captureButton" class="btn btn-lumut d-none" style="font-family: 'Comfortaa', cursive;">Ambil Gambar</button>
         <form id="cameraForm" class="mt-3 d-none" enctype="multipart/form-data">
             <input type="file" id="blobImage" name="file" hidden>
-            <button class="btn btn-lumut" type="submit">Analisis Gambar</button>
-            <button id="takeAnotherPicture" class="btn btn-warning d-none" type="button">Ambil Gambar Lain</button>
+            <button class="btn btn-lumut" type="submit" style="font-family: 'Comfortaa', cursive;">Analisis Gambar</button>
+            <button id="takeAnotherPicture" class="btn btn-warning d-none" type="button" style="font-family: 'Comfortaa', cursive;">Ambil Gambar Lain</button>
         </form>
     </div>
 </section>
@@ -169,6 +170,7 @@
     const capturedImage = document.getElementById('capturedImage');
     const activateCameraButton = document.getElementById('activateCamera');
     const cameraForm = document.getElementById('cameraForm');
+    const captureButton = document.getElementById('captureButton');
     const takeAnotherPictureButton = document.getElementById('takeAnotherPicture');
 
     let stream;
@@ -180,21 +182,32 @@
                 video.srcObject = stream;
                 video.play();
                 activateCameraButton.classList.add('d-none');
-                cameraForm.classList.remove('d-none');
+                captureButton.classList.remove('d-none');
             })
             .catch((err) => {
                 console.error("Kamera tidak tersedia:", err);
             });
     });
 
-    cameraForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
-
+    captureButton.addEventListener('click', () => {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         const context = canvas.getContext('2d');
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
+        const imageData = canvas.toDataURL('image/png');
+        capturedImage.src = imageData;
+        capturedImage.classList.remove('d-none');
+        cameraForm.classList.remove('d-none');
+        takeAnotherPictureButton.classList.remove('d-none');
+
+        // stop camera after capture
+        let tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+        video.srcObject = null;
+        captureButton.classList.add('d-none');
+
+        // convert dataURL to blob and send to backend
         canvas.toBlob(async function (blob) {
             const formData = new FormData();
             formData.append("file", blob, "camera-capture.png");
@@ -213,4 +226,25 @@
             }
         }, 'image/png');
     });
+
+    takeAnotherPictureButton.addEventListener('click', () => {
+        capturedImage.classList.add('d-none');
+        cameraForm.classList.add('d-none');
+        takeAnotherPictureButton.classList.add('d-none');
+        activateCameraButton.classList.remove('d-none');
+        startCamera();
+    });
+
+    function startCamera() {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            .then((userStream) => {
+                stream = userStream;
+                video.srcObject = stream;
+                video.play();
+                captureButton.classList.remove('d-none');
+            })
+            .catch((err) => {
+                console.error("Kamera tidak tersedia:", err);
+            });
+    }
 </script>
