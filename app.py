@@ -6,24 +6,23 @@ import joblib
 import base64
 from io import BytesIO  
 
-# 7. Inisialisasi aplikasi Flask
+# Inisialisasi Flask
 app = Flask(__name__)
 
 # Load variabel lingkungan
-tesseract_path = os.environ.get("TESSERACT_PATH", r'C:\Program Files\Tesseract-OCR\tesseract.exe')
 port = int(os.environ.get("PORT", 5000))  
 secret_key = os.environ.get("SECRET_KEY", "punyapinaa")
 
-pytesseract.pytesseract.tesseract_cmd = tesseract_path
+# Untuk Linux (Railway), tidak perlu set path manual ke tesseract
+# pytesseract.pytesseract.tesseract_cmd = os.environ.get("TESSERACT_PATH", r'C:\Program Files\Tesseract-OCR\tesseract.exe')
+
 app.secret_key = secret_key
 
 # Konfigurasi direktori unggahan
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-import os
-
-# 8. Load model dan vectorizer
+# Load model dan vectorizer
 base_dir = os.path.dirname(__file__)
 model_path = os.path.join(base_dir, "model_xgboost.pkl")
 vectorizer_path = os.path.join(base_dir, "tfidf_vectorizer.pkl")
@@ -31,20 +30,20 @@ vectorizer_path = os.path.join(base_dir, "tfidf_vectorizer.pkl")
 model = joblib.load(model_path)
 vectorizer = joblib.load(vectorizer_path)
 
-# 9. Fungsi preprocessing gambar
+# Fungsi preprocessing gambar
 def preprocess_image(image):
-    img = image.convert('L')
+    img = image.convert('L')  # Grayscale
     img = ImageEnhance.Contrast(img).enhance(2.0)
     img = img.filter(ImageFilter.MedianFilter())
     return img
 
-# 10. Fungsi ekstraksi teks menggunakan OCR
+# Fungsi ekstraksi teks dari gambar
 def process_image(image):
     img = Image.open(image) if isinstance(image, str) else Image.open(image)
     img = preprocess_image(img)
     return pytesseract.image_to_string(img, config='--psm 6')
 
-# Fungsi klasifikasi alergen dengan rekomendasi
+# Fungsi klasifikasi alergen
 def classify_allergens(text):
     detected_allergens = []
     allergen_recommendations = {
@@ -81,7 +80,6 @@ def classify_allergens(text):
         "E133": "Brilliant Blue FCF (pewarna sintetik biru)",
         "E110": "Sunset Yellow FCF (pewarna sintetik kuning)",
         "E491": "Sorbitan Monostearate (emulsifier, digunakan pada makanan panggang)",
-        "E491": "Sorbitan Monostearate (emulsifier, digunakan pada makanan panggang)",
         "E319": "TBHQ (antioksidan sintetis)",
         "E621": "Monosodium Glutamate (penyedap rasa)",
         "E307": "Alpha Tocopherol (vitamin E, antioksidan)"
@@ -95,6 +93,7 @@ def classify_allergens(text):
 
     return detected_allergens, e_codes
 
+# Routing
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -143,6 +142,6 @@ def detect():
 
     return render_template('detect.html', result=result)
 
-# Menjalankan Flask secara normal (untuk deployment di Render)
+# Menjalankan Flask (khusus lokal)
 if __name__ == '__main__':
     app.run()
