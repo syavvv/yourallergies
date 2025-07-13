@@ -21,9 +21,15 @@ app.secret_key = secret_key
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+import os
+
 # 8. Load model dan vectorizer
-model = joblib.load('model_xgboost.pkl')
-vectorizer = joblib.load('tfidf_vectorizer.pkl')
+base_dir = os.path.dirname(__file__)
+model_path = os.path.join(base_dir, "model_xgboost.pkl")
+vectorizer_path = os.path.join(base_dir, "tfidf_vectorizer.pkl")
+
+model = joblib.load(model_path)
+vectorizer = joblib.load(vectorizer_path)
 
 # 9. Fungsi preprocessing gambar
 def preprocess_image(image):
